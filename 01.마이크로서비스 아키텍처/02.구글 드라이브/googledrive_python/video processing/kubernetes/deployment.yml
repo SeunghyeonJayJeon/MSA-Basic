@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video processing
+  labels:
+    app: video processing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: video processing
+  template:
+    metadata:
+      labels:
+        app: video processing
+    spec:
+      containers:
+        - name: video processing
+          image: username/video processing:latest
+          ports:
+            - containerPort: 8084
+        
