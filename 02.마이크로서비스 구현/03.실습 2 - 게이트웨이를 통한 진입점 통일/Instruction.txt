@@ -1,0 +1,53 @@
+Instruction
+
+게이트웨이를 사용하여 모든 API 서버들의 엔드포인트 단일화
+order 마이크로 서비스를 8081 포트로 실행한다.
+order 서비스를 찾아서 삭제해야 한다면
+
+# netstat -lntp  grep 808 
+tcp        0      0 0.0.0.08080            0.0.0.0               LISTEN      3752java           
+tcp        0      0 0.0.0.08081            0.0.0.0               LISTEN      3109java           
+# kill -9 3109  -- 해당 pid
+
+gateway 마이크로 서비스를 8080 포트로 실행한다.
+
+cd gateway
+mvn spring-bootrun
+
+기동된 order 서비스를 호출하여 주문 1건을 요청한다.
+
+  http localhost8081orders productId=1 productName=TV qty=3
+
+  http localhost8081orders
+
+게이트웨이를 통하여 같은 url 을 port 를 변경하여 실행한다.
+
+ http localhost8080orders productId=1 productName=PC qty=1
+
+ http localhost8080orders
+
+delivery 마이크로 서비스를 8082 포트로 실행한다.
+
+게이트웨이서비스의 application.yaml 의 spring.cloud.gateway.routes 에 아래 설정을 추가하여 delivery 서비스로의 라우팅을 추가한다. (indent 에 주의해주세요)
+
+    - id delivery
+        uri httplocalhost8082
+        predicates
+          - Path=deliveries 
+
+게이트웨이 서비스를 재기동 한다.
+
+fuser -k 8080tcp  #서비스 종료
+mvn spring-bootrun #서비스 기동
+
+8082 포트로 delivery 서비스를 호출하여 보고, 8080포트로 게이트웨이를 통하여 delivery 
+서비스를 호출한다.
+
+http localhost8082deliveries
+http localhost8080deliveries
+
+Lab에 사용된 모든 서비스를 종료한다.
+(808x 포트를 리슨하는 모든 프로세스 죽이기)
+kill -9 `netstat -lntpgrep 808awk '{ print $7 }'grep -o '[0-9]'`
+게이트웨이 커스터마이징 방법
+httpswww.baeldung.comspring-cloud-custom-gateway-filters
