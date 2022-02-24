@@ -537,3 +537,31 @@ https://www.martinfowler.com/articles/micro-frontends.html
 https://micro-frontends.org/
 https://github.com/jinyoung/micro-frontends-with-web-components
 https://medium.com/javascript-in-plain-english/create-micro-frontends-using-web-components-with-support-for-angular-and-react-2d6db18f557a
+
+
+포트넘버 수정
+micro-fe-ng/package.json 을 아래와 같이 수정:
+
+    "start": "npm run build && serve -l 5001 dist/micro-fe-ng",
+
+–>
+
+    "start": "npm run build && serve -l 8081 dist/micro-fe-ng",
+나머지 micro-fe-react, micro-fe-vue, micro-fe-wrapper 의 package.json 내의 포트넘버를 아래와 같이 변경:
+
+5002 -> 8082
+5003 -> 8083
+5000 -> 8080
+각 프로젝트를 Open in Terminal 을 통해 별도 터미널을 열고
+
+npm i
+npm start
+마지막으로, micro-fe-wrapper/index.html 을 다음과 같이 수정:
+
+
+  <script src="https://8081-labs--1471950141.kuberez.io/main.js"></script>
+  <script src="https://8082-labs--1471950141.kuberez.io/main.js"></script>
+  <script src="https://8083-labs--1471950141.kuberez.io/order-form.js"></script>
+
+
+Labs> 포트열기> 8080
