@@ -1,8 +1,0 @@
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/AbstractEvent.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/PolicyHandler.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/ProductController.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/ProductApplication.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/config/kafka/KafkaProcessor.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/Product.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/ProductRepository.java
-/home/project/Kafka-Scaling/product2/src/main/java/kafkatest/OrderPlaced.java
