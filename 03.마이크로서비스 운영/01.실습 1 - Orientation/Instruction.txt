@@ -1,0 +1,93 @@
+Instruction
+자주쓰는 명령 모음
+명령어 설치
+apt-get update
+apt-get install 명령어  
+e.g. apt-get install zip
+포트 사용중 프로세스 확인과 삭제
+netstat -ntlp  grep 80
+kill -9 ProcessId
+작업 결과 폴더 압축해서 다운받기
+zip test.zip .
+해당 파일 선택 후, File  Download
+기타 리눅스 명령 따라하기
+파일시스템 탐색
+ls 
+pwd 
+mkdir my-workspace 
+cd my-workspace 
+cd ..
+rmdir my-workspace
+
+리다이렉션 & 파이프 ()
+파이프()  프로세스간 선행 표준 출력을 후행 표준 입력으로 사용
+cat deployment.yaml
+ls  grep deployment.yaml
+cat deployment.yaml   grep hello   # 파일에서 특정 문자열 검색
+리다이렉션  스트림의 흐름을 콘솔이 아닌 파일로 제어
+ls  ls.txt # ls 명령어의 결과를 콘솔이 아닌, 파일로 기록
+head  ls.txt # ls.txt의 출력을 head의 입력 스트림으로, 10 lines 출력
+head  ls.txt  ls2.txt
+echo hello, world 2  deployment2.yaml   # 첫번째 명령의 결과를 두번째 파일로 저장
+echo hello, korea  deployment2.yaml   # 첫번째 명령의 결과를 두번째 파일의 끝에 추가
+파일 핸들링
+cp deployment.yaml deployment_backup.yaml
+rm deployment.yaml
+cd ..
+rm -rf my-workspace
+Linux Basic Commands
+.
+chmod 400 ~.kubeconfig
+history
+grep
+mkdir -p abc
+tree
+pstree
+lsb_release -a
+lscpu
+free -m
+unzip
+tar
+cat
+top, htop
+ssh, scp
+sudo -i (root 사용자로 전환)
+su - user
+- Package 관리
+(sudo 또는 root 사용자)
+
+apt install bind9 -y
+apt remove bind9 -y
+apt list
+apt search
+apt update
+- 파일 에디터
+sed 'szasminorder1.0zasmin.azurecr.ioorder.1.1g' deployall.yml
+sed  -i 'szasminorder1.0zasmin.azurecr.ioorder.1.1g' deployall.yml
+vi
+%sfoobarg
+set ts=2 (탭키를 2칸으로 설저)
+set nu (라인에 번호표시)
+q! (변경없이 종료) wq! (변경 저장후 종료)
+g  전체, i  대소문자 구분없이, c  interact mode (중복 사용가능)
+cw (현재 커서에서 단어 끝까지), c$ (현재 커서에서 문장 끝까지), aaa (aaa 찾기 다음 다어 찾기는 n)
+- Network 관리
+ip
+ss
+    -a  모든 소켓을 출력
+    -l  listen 상태인 소켓 만 출력
+    -n  서비스 이름 확인 생략(호스트 이름과 포트가 숫자 형식으로 표시)
+    -p  PID 와 프로세스 명을 출력
+    -t  TCP 소켓만 출력
+    -u  UDP 소켓만 출력
+
+netstat
+route
+- CIDR (Classless Inter-Domain Routing)
+cidr 계산기 사이트 httpswww.ipaddressguide.comcidr
+
+- 디스크 관리
+df, du
+lsblk
+fdisk
+mkfs.ext4 

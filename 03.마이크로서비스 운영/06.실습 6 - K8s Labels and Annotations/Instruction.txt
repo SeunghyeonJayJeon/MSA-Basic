@@ -1,0 +1,60 @@
+Instruction
+
+Labels and Annotations
+nginx Deploy 및 Label 확인
+
+cd container-orchestration
+cd yaml
+kubectl apply -f nginx.yaml
+kubectl get pod --show-labels
+kubectl get deploy nginx-deployment -o yaml
+
+Equality-Based Selectors
+
+kubectl get pods -l app=nginx
+kubectl get pods --selector app=nginx
+
+Set-Based Selectors(OR, AND)
+
+kubectl get pods --selector 'app in (nginx, nginx1)'
+kubectl get po --selector 'env in(test, test1), app in (nginx, nginx1)'
+
+Annotation을 활용하여 Kubernetes RollBack 하기
+
+nginx 디플로이
+1.7.9 버전 nginx 배포
+
+kubectl apply -f nginx.yaml
+
+배포주석 추가
+
+kubectl annotate deploy nginx-deployment kubernetes.iochange-cause=v1 is released to nginx1.7.9
+kubectl get deploy -o wide
+
+1.9.1 버전 nginx 배포
+
+kubectl set image deploy nginx-deployment nginx=nginx1.9.1
+kubectl get deploy -o wide
+
+배포주석 달기
+
+kubectl annotate deploy nginx-deployment kubernetes.iochange-cause=v2-nginx1.9.1, Coupon event function was added.
+
+배포 히스토리 확인
+
+kubectl rollout history deploy nginx-deployment
+
+다음과 같이 출력됨을 확인
+
+REVISION CHANGE-CAUSE
+
+1 v1 is nginx1.7.9
+2 v2 is nginx1.9.1
+
+이전 버전으로 롤백하기
+
+kubectl rollout undo deploy nginx-deployment
+kubectl get deploy -o wide
+kubectl rollout undo deploy nginx-deployment --to-revision 5
+
+초기 버전(nginx1.7.9)으로 롤백되었는지 확인합니다.

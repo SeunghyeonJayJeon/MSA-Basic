@@ -1,0 +1,37 @@
+Instruction
+AWS Cloud 및 Kubernetes Configuration
+IAM 보안 자격증명 설정
+aws configure
+AWS Access Key ID [None]
+AWS Secret Access Key [None]
+Default region name [None] 
+Default output format [None] 
+IAM 설정 확인
+aws iam list-account-aliases
+# Root계정의 별칭이 출력된다.
+AWS 클러스터 생성
+eksctl create cluster --name (Cluster-Name) --version 1.21 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 3
+AWS 클러스터 토큰 가져오기
+aws eks --region (Region-Code) update-kubeconfig --name (Cluster-Name)
+kubectl get all
+# 클러스터 설정확인
+kubectl config current-context
+AWS 컨테이너 레지스트리(ECR) 생성
+aws ecr create-repository 
+    --repository-name (User-Account) 
+    --image-scanning-configuration scanOnPush=true 
+    --region (Region-Code)
+ECR 생성 확인
+aws ecr list-images --repository-name (User-Account)
+Docker Login to ECR
+docker login --username AWS -p $(aws ecr get-login-password --region (Region-Code)) (Account-Id).dkr.ecr.(Region-Code).amazonaws.com
+Metric-Server 설치
+kubectl apply -f httpsgithub.comkubernetes-sigsmetrics-serverreleaseslatestdownloadcomponents.yaml
+# 설치 확인
+kubectl top node
+kubectl top pod
+- Lab에 필요한 YAMLs 다운로드
+cd homeproject
+git clone httpsgithub.comevent-stormingcontainer-orchestration.git
+cd container-orchestrationyaml
+

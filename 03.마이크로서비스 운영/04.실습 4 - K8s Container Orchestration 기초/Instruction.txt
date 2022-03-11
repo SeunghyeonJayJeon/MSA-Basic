@@ -1,0 +1,47 @@
+무작정 따라 배포해 보기
+이미지 배포 (API기반 Imperative)
+생성된 이미지 기반의 컨테이너 만들기
+kubectl config current-context
+kubectl get all
+kubectl create deployment my-home --image=apexacme/my-nginx:v1
+# apexacme -> 나의 도커계정으로 변경
+# Container 생성확인
+kubectl get all
+컨테이너 접속 채널 생성
+생성된 컨테이너에 사용자가 접속할 수 있는 라우터 생성
+kubectl expose deploy my-home --type=LoadBalancer --port=80
+kubectl get all
+# my-home Service 생성확인
+마이크로서비스 접속하기
+발급된 외부 접속정보(공인 IP, or Domain Name)를 복사하여 브라우저(80 포트)에 붙여넣기
+마이크로서비스 컨텐츠 확인
+이미지 배포 (YAML기반 Declarative)
+아래 내용을 복사
+터미널 Explorer 영역에서 마우스 우측버튼 > ‘New File’
+파일명에 my-home.yaml
+붙여넣기 및 저장
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata: 
+  name: "my-home2"
+  labels: 
+    app: "my-home2"
+spec: 
+  selector: 
+    matchLabels: 
+      app: "my-home2"
+  replicas: 1
+  template: 
+    metadata: 
+      labels: 
+        app: "my-home2"
+    spec: 
+      containers: 
+        - name: "my-home2"
+          image: "apexacme/my-nginx:v1"
+          ports: 
+            - containerPort: 80
+YAML에서 컨테이너 생성
+kubectl apply -f my-home.yaml
+kubectl getl deployment
+kubectl get all
