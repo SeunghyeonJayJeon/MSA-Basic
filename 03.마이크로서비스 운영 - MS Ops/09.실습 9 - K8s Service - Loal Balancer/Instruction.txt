@@ -1,0 +1,65 @@
+
+service 생성, 조회, 삭제
+
+Service basic template
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: my-service
+  spec:
+    selector:
+      app: MyApp
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 8080
+    type: ClusterIP/NodePort/LoadBalancer	
+	
+대상 컨테이너 생성
+
+kubectl create deploy nginx --image=nginx            
+아래의 결과가 출력되었는지 확인합니다.
+deployment.apps/nginx created
+Service 생성 - ClusterIP Type
+kubectl expose deploy nginx --type=ClusterIP --port=80 --target-port=80
+# 생성된 ClusterIP 정보확인
+kubectl get service 
+# Selector 확인
+kubectl get service nginx -o yaml
+새로운 Terminal에서 ClusterIP로 서비스 접근
+kubectl apply -f siege.yaml
+kubectl exec -it siege -- /bin/bash
+http http://10.x.x.x:80
+Service 생성 - NodePort Type
+kubectl delete service nginx
+kubectl expose deploy nginx --type=NodePort --port=80 --target-port=80
+# 생성된 NodePort 정보확인
+kubectl get service 
+# Selector 확인
+kubectl get service nginx -o yaml
+NodePort로 서비스 접근
+# Worker-Node IP 확인
+kubectl get nodes
+kubectl describe node Node-Instance
+# siege 터미널에서 NodePort 접속
+http http://192.168.x.x:3xxxx
+Service 생성 - LoadBalancer Type
+kubectl delete service nginx
+kubectl expose deploy nginx --type=LoadBalancer --port=80 --target-port=80
+# 생성된 LoadBalancer 정보확인
+kubectl get service 
+# Selector 확인
+kubectl get service nginx -o yaml
+LoadBalancer 엔드포인트로 서비스 접근
+# nginx Service의 External-IP 복사   
+# Web Browser를 통한 접속
+생성된 서비스이름으로 접속
+# siege 터미널에서
+http http://nginx:80
+Kubernetes Cluster에서 서비스가 생성되면 Kube-DNS에 A레코드가 등록되고, 서비스가 삭제되면 A레코드 또한 자동 삭제한다.
+Kube-DNS 정보확인
+kubectl get service -n kube-system
+kubenetes는 모든 컨테이너에 NameServer(Kube-DNS) 정보를 자동 Injection 한다.
+Service ClusterIP 또한 유동적이므로, Cluster 내에서는 '서비스 이름’으로 접근한다.
+yaml 조회
+kubectl get deploy nginx -o yaml

@@ -1,0 +1,21 @@
+Namespaces
+Namespace 목록조회
+kubectl get namespace
+아래와 비슷한 결과가 나왔는지 확인해 줍니다.
+NAME　　　　　　　 STATUS　  AGE
+default　　　　　　　Active　　2d1h
+kube-node-lease　　   Active　　2d1h
+kube-public　　　　　Active　　2d1h
+kube-system　　　　  Active　　2d1h
+namespace 생성
+namespace를 생성합니다.
+kubectl create namespace gdhong
+kubectl get ns
+namespace 상에 객체 배포
+생성된 namespace에 객체를 배포합니다.
+kubectl create deploy nginx --image=nginx -n gdhong
+kubectl expose deploy nginx --port=80 -n gdhong
+kubectl get all -n gdhong
+namespace 삭제
+namespace를 삭제합니다.
+kubectl delete ns gdhong
