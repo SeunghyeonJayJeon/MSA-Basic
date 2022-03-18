@@ -1,0 +1,72 @@
+Instruction
+Ingress
+k8s 패키지 인스톨러 Helm
+helm version
+Helm 이 설치되어 있지 않은 경우, Helm(패키지 인스톨러) 설치
+Helm 3.x 설치(권장)
+curl httpsraw.githubusercontent.comhelmhelmmasterscriptsget-helm-3  get_helm.sh
+chmod 700 get_helm.sh
+.get_helm.sh
+Helm 2.x 설치
+curl httpsraw.githubusercontent.comkuberneteshelmmasterscriptsget  bash
+kubectl --namespace kube-system create sa tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-systemtiller
+helm init --service-account tiller
+Helm으로 Ingress Controller 설치
+helm repo add stable httpscharts.helm.shstable
+helm repo add ingress-nginx httpskubernetes.github.ioingress-nginx
+helm repo update
+kubectl create namespace ingress-basic
+helm version 확인
+helm version 2.x 일때
+helm install --name nginx-ingress stablenginx-ingress --namespace=ingress-basic
+helm version 3.x 일때
+helm install nginx-ingress ingress-nginxingress-nginx --namespace=ingress-basic
+설치확인
+Ingress Controller의 EXTERNAL-IP가 API Gateway 엔드포인트
+kubectl get all --namespace=ingress-basic
+Ingress 대상 서비스(BLUE, GREEN) 생성
+pwd 로 현 위치가 container-orchestrationyamlingressblue-svc 인지 확인
+도커라이징 & 이미지 Push
+docker build -t 052937454741.dkr.ecr.ap-northeast-2.amazonaws.comuser30-nginx-bluelatest .
+# Amazon Cluster인 경우, 아래 명령어 실행
+aws ecr create-repository --repository-name user30-nginx-blue --region ap-northeast-2
+docker push 052937454741.dkr.ecr.ap-northeast-2.amazonaws.comuser30-nginx-bluelatest
+배포 전 yaml을 열어 image URL을 나의 Full-Image-Name으로 수정
+EDIT nginx-blue-deployment.yaml 
+kubectl create -f nginx-blue-deployment.yaml
+pwd 로 현 위치가 container-orchestrationyamlingressgreen-svc 인지 확인
+도커라이징 & 이미지 Push
+docker build -t (283210891307).dkr.ecr.ap-northeast-2.amazonaws.comnginx-greenlatest .
+# Amazon Cluster인 경우, 아래 명령어 실행
+aws ecr create-repository --repository-name nginx-green --region ap-northeast-2
+docker push (283210891307).dkr.ecr.ap-northeast-2.amazonaws.comnginx-greenlatest
+배포 전 yaml을 열어 image URL을 나의 Full-Image-Name으로 수정
+EDIT nginx-green-deployment.yaml
+kubectl create -f nginx-green-deployment.yaml
+서비스 생성 확인
+kubectl get deploy,service -n ingress-basic
+Ingress Routing Rule 생성
+pwd 로 현 위치가 container-orchestrationyamlingress 인지 확인
+kubectl apply -f path-based-ingress.yaml
+kubectl get ingress -n ingress-basic
+Ingress 라우팅 테스트
+Ingress Controller의 External-IP를 웹 브라우저에서 실행
+httpIngress-External-IPblue 를 입력
+httpIngress-External-IPgreen을 입력
+
+
+Cluster에서의 Web-URL 원리
+
+
+nginx 이미지를 가지고, default 및 ingress-basic 네임스페이스 2곳에 배포(deploy 생성)하세요.
+
+kubectl exec -it pod/nginx-6799fc88d8-l6kqk -- /bin/bash      
+kubectl exec -it pod/nginx-6799fc88d8-l6kqk -- /bin/bash -n ingress-basic
+
+   1  curl http://nginx-blu-svc
+    2  curl http://nginx-blue-svc
+    3  curl http://nginx-blue-svc.ingress-basic
+    4  curl http://nginx-blue-svc.ingress-basic.svc.cluster.local:80
+
+각 namespace에서 서비스 호출하기

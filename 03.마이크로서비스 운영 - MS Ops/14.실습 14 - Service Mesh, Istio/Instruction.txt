@@ -1,0 +1,39 @@
+Instruction
+Service Mesh, Istio
+Istio Install
+curl -L httpsistio.iodownloadIstio  ISTIO_VERSION=1.7.1 TARGET_ARCH=x86_64 sh -
+# istio v1.7.1은 Kubernetes 1.16이상에서만 동작
+cd istio-1.7.1
+export PATH=$PWDbin$PATH
+istioctl install --set profile=demo --set hub=gcr.ioistio-release
+Istio 모니터링 툴(Telemetry Applications) 설치
+vi samplesaddonskiali.yaml
+4라인의
+apiVersion apiextensions.k8s.iov1beta1 을
+apiVersion apiextensions.k8s.iov1으로 수정
+kubectl apply -f samplesaddons
+kiali.yaml 오류발생시, 아래 명령어 실행
+kubectl apply -f httpsraw.githubusercontent.comistioistiorelease-1.7samplesaddonskiali.yaml
+모니터링(Tracing & Monitoring) 툴 설정
+Monitoring Server - Kiali
+기본 ServiceType 변경  ClusterIP를 LoadBalancer 로…
+kubectl edit svc kiali -n istio-system
+%sClusterIPLoadBalancerg
+wq!
+모니터링 시스템(kiali) 접속 
+EXTERNAL-IP20001 (adminadmin)
+
+Tracing Server - Jaeger
+
+기본 ServiceType 변경  ClusterIP를 LoadBalancer 로…
+kubectl edit svc tracing -n istio-system
+%sClusterIPLoadBalancerg
+wq!
+분산추적 시스템(tracing) 접속  EXTERNAL-IP80
+설치확인
+kubectl get all -n istio-system
+How to enable Istio
+#1. Whenever deploying to Cluster, Using pre-processing command “Istio kube-inject”
+e.g. $ kubectl apply -f (istioctl kube-inject -f Deployment.yml) -n istio-test-ns
+#2. Using Istio-enabled Namespace.
+e.g. $ kubectl label namespace tutoria
