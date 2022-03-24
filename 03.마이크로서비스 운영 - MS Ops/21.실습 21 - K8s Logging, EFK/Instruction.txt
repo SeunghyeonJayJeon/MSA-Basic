@@ -1,0 +1,75 @@
+Instruction
+
+마이크로서비스 Logging
+
+EFK(Elasticsearch, Fluentd, Kibana) 스텍을 클러스터에 설치하여 마이크로서비스 로그를 중앙에서 관제한다.
+대상 마이크로서비스 배포
+kubectl create ns shop
+kubectl apply -f httpsraw.githubusercontent.comacmexiidemomastereduorder-liveness.yaml -n shop
+kubectl expose deploy order --port=8080 -n shop
+kubectl apply -f httpsraw.githubusercontent.comacmexiidemomasteredudelivery-rediness-v1.yaml -n shop
+kubectl expose deploy delivery --port=8080 -n shop
+EFK Stack 설치
+Helm 3.x version Install
+curl httpsraw.githubusercontent.comhelmhelmmasterscriptsget-helm-3  get_helm.sh
+chmod 700 get_helm.sh
+.get_helm.sh
+Elastic Search 및 Kibana Install
+Helm repo에 elastic 추가
+helm repo add elastic httpshelm.elastic.co
+helm repo update
+Helm을 이용한 ElasticSearch 와 kibana 설치
+kubectl create ns logging
+helm install elasticsearch elasticelasticsearch -n logging
+helm install kibana elastickibana -n logging
+Kibnana Service 생성
+kubectl apply -f - EOF
+apiVersion v1
+kind Service
+metadata
+  name kibana-external
+  namespace logging
+  labels
+    app kibana
+spec
+  selector
+    app kibana
+  ports
+    - port 5601
+      targetPort 5601
+  type LoadBalancer
+EOF
+Fluentd 데몬 설치
+Helm repo 에 fluentd 추가
+helm repo add fluent httpsfluent.github.iohelm-charts
+helm repo update
+Helm을 이용한 FluentD 설치
+helm install fluentd fluentfluentd -n logging
+Kibana 접속
+Kibana-external External Ip 확인
+kubectl get svc -n logging
+kibana-external의 external ip를 복사한 후 주소창에 (EXTERNAL IP)5601 입력
+Kibana 사용 방법
+스크린샷 2022-02-23 오후 2 14 28
+좌측 상단 메뉴바의 Management의 Stack Management로 이동
+스크린샷 2022-02-23 오후 2 20 22
+Stack Management에서 좌측 메뉴바에서 Kibana의 index pattern 클릭
+스크린샷 2022-02-23 오후 2 21 00
+Create an Index Pattern에서 name을 fluentd 로 설정 후 create
+스크린샷 2022-02-23 오후 2 18 50
+좌측 상단 햄버거 메뉴바 클릭 후 Analystic의 discover로 이동
+스크린샷 2022-02-23 오후 2 15 45
+이동후 Add Filter 클릭
+스크린샷 2022-02-23 오후 2 24 50
+Field 에 CONDITION을 입력
+Operator 선택
+Value에 확인하고 싶은 대상정보 입력
+ex)
+스크린샷 2022-02-23 오후 2 25 35
+
+Filter Example
+시나리오  shop 네임스페이스의 log를 확인 시
+
+Field  kubernetes.namespace_name
+Opterator  is
+Value  shop

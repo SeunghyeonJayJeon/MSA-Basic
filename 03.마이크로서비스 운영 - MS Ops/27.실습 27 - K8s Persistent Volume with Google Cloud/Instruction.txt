@@ -1,0 +1,54 @@
+Instruction
+
+Volumes
+
+/container-orchestration/yaml# 의 경로에서
+cd volume/gcp
+Volumes : emptyDir
+kubectl apply -f volume-emptydir.yaml
+지정 컨테이너 접속 후, 파일 생성
+kubectl exec -it shared-volumes --container redis -- /bin/bash
+cd /data/shared
+echo test… > test.txt
+exit
+다른 컨테이너로 접속 후, 파일 확인
+kubectl exec -it shared-volumes --container nginx -- /bin/bash
+cd /data/shared
+ls
+Volumes : hostPath
+kubectl apply -f volume-hostpath.yaml
+Node의 Local 디스크 경로를 Pod에 마운트
+같은 hostPath에 있는 볼륨은 여러 Pod사이에서 공유
+Pod가 삭제되어도 hostPath에 있는 파일은 유지
+Pod가 재기동 되어 다른 Node에서 기동될 경우,
+새로운 Node의 hostPath를 사용
+Node의 로그 파일을 읽는 로그 에이전트 컨테이너 등에 사용가능
+Pod 생성 및 확인 (Pod 내, ls -al /data/shared)
+Volumes example : gitRepo
+kubectl apply -f volume-gitrepo.yaml
+Pod 생성시 지정된 Git 리파지토리의 특정 리비전을
+Cloning하여 디스크 볼륨 생성
+물리적으로는 emptyDir이 생성되고 Git Clone 수행
+HTML 같은 정적 파일 및 Nodejs 같은 스크립트 기반코드 배포에 유용
+StorageClass - Dynamic PV Provisioning
+kubectl get storageclass
+아래와 같은 결과가 출력되었는지 확인해 줍니다.
+NAME                           PROVISIONER      RECLAIMPOLICY   VOLUMEBINDINGMODE     
+premium-rwo             pd.csi.storage.gke.io   Delete            WaitForFirstConsumer 
+standard (default)     kubernetes.io/gce-pd  Delete            Immediate            
+standard-rwo             pd.csi.storage.gke.io   Delete            WaitForFirstConsumer 
+File System Provisioner 설치
+내 클러스터에 Filestore CSI Driver를 설치한다.
+gcloud container clusters update user##-gke --update-addons=GcpFilestoreCsiDriver=ENABLED --zone ZONE-CODE
+CSI Driver 설치 확인
+kubectl get storageclass
+pvc 생성
+kubectl apply -f pvc.yaml
+아래와 같은 결과가 출력되었는지 확인해 줍니다.
+persistentvolumeclaim/pod-pvc created
+Create Pod with PVC and Check 마운트 볼륨
+kubectl apply -f pod-with-pvc.yaml
+kubectl get pod
+kubectl exec -it mypod -- /bin/bash
+cd /mnt/gcp
+df -k 로 PVC 마운트 확인

@@ -1,0 +1,278 @@
+Instruction
+
+Kubernetes Installation
+Preparing a VM & Connect
+Prepare Local, or Cloud VM
+
+Connect to VM(here, we use AWS EC2 with Linux AMI)
+
+ssh -i .k8s.pem ubuntu@ec2-x-x-x-x.REGION-NAME.compute.amazonaws.com
+Set root passwd and switching User to root
+
+sudo passwd root
+su -
+Update and upgrade Ubuntu
+
+apt update
+apt upgrade -y
+Install K8s Binaries
+The next steps will prepare CRI and Software for kube setup.
+
+Install default Container Runtime - Docker
+
+apt install docker.io -y
+Download and extract the K8s binaries
+
+wget httpsstorage.googleapis.comkubernetes-releasereleasev1.9.11kubernetes-server-linux-amd64.tar.gz
+tar -xzf kubernetes-server-linux-amd64.tar.gz
+Install the K8s binaries
+
+cd kubernetesserverbin
+mv kubectl kubelet kube-apiserver kube-controller-manager kube-scheduler kube-proxy usrbin
+cd
+Test that kubectl can now be called
+
+kubectl
+Remove unused resources
+
+rm -rf kubernetes kubernetes-server-linux-amd64.tar.gz
+Creating the Kube
+Set up kubelet
+The next steps will get kubelet working and show it in action.
+
+Create a directory for kubelet manifests
+
+mkdir -p etckubernetesmanifests
+Start kubelet in the background
+
+kubelet --pod-manifest-path etckubernetesmanifests & etckuberneteskubelet.log &
+Check its status and initial logs
+
+ps -au  grep kubelet
+head etckuberneteskubelet.log
+Create a Pod using the kubelet’s manifest directory
+
+cat EOF  etckubernetesmanifestskubelet-test.yaml
+apiVersion v1
+kind Pod
+metadata
+name kubelet-test
+spec
+containers
+- name alpine
+    image alpine
+    command [binsh, -c]
+    args [while true; do echo SuPeRgIaNt; sleep 15; done]
+EOF
+Verify that kubelet has started the Pod (this may take up to a minute)
+
+docker ps
+Check the container’s logs
+
+docker logs {CONTAINER ID}
+Set up etcd
+The next steps will get the kube’s databasestate store working and show it in action.
+
+Download and extract etcd and etcdctl
+
+wget httpsgithub.cometcd-ioetcdreleasesdownloadv3.2.26etcd-v3.2.26-linux-amd64.tar.gz
+tar -xzf etcd-v3.2.26-linux-amd64.tar.gz
+Install the etcd and etcdctl binaries
+
+mv etcd-v3.2.26-linux-amd64etcd usrbinetcd
+mv etcd-v3.2.26-linux-amd64etcdctl usrbinetcdctl
+Remove leftover resources
+
+rm -rf etcd-v3.2.26-linux-amd64 etcd-v3.2.26-linux-amd64.tar.gz
+Start etcd
+
+etcd --listen-client-urls http0.0.0.02379 --advertise-client-urls httplocalhost2379 & etckubernetesetcd.log &
+See if the database is healthy with etcdctl
+
+etcdctl cluster-health
+Try to get any resources from the kube
+
+kubectl get all --all-namespaces
+Set up kube-apiserver
+The next steps will get the kube’s API working and show it in action.
+
+Start kube-apiserver
+
+kube-apiserver --etcd-servers=httplocalhost2379 --service-cluster-ip-range=10.0.0.016 --bind-address=0.0.0.0 --insecure-bind-address=0.0.0.0 & etckubernetesapiserver.log &
+Check its status and initial logs
+
+ps -au  grep apiserver
+head etckubernetesapiserver.log
+Hit an API endpoint to see kube-apiserver respond
+
+curl httplocalhost8080apiv1nodes
+Set up a kubeconfig File for kubectl
+The next steps will allow kubectl to be properly configured.
+
+Check to see that kubectl sees the API server
+
+kubectl cluster-info
+Add the API server address to a kubeconfig file
+
+kubectl config set-cluster kube-from-scratch --server=httplocalhost8080
+kubectl config view
+Create a context for kubectl which will point to that apiserver
+
+kubectl config set-context kube-from-scratch --cluster=kube-from-scratch
+kubectl config view
+Use the context created earlier for kubectl
+
+kubectl config use-context kube-from-scratch
+kubectl config view
+check that resources can now be seen on the cluster
+
+kubectl get all --all-namespaces
+kubectl get node
+Set up the New Config for kubelet
+The next steps will take the configuration created and use it to configure kubelet.
+
+Restart kubelet with a new flag pointing it to the apiserver (this step may fail once or twice, try again)
+
+pkill -f kubelet
+kubelet --register-node --kubeconfig=.kubeconfig & etckuberneteskubelet.log &
+Check its status and initial logs
+
+ps -au  grep kubelet
+head etckuberneteskubelet.log
+Check to see that kubelet has registered as a node
+
+kubectl get node
+Check to see the old Pod is not coming up
+
+docker ps
+Check that the Pod manifest is still present
+
+ls etckubernetesmanifests
+Create a new Pod using kubectl, to test control plane components as they are set up
+
+cat EOF  .kube-test.yaml
+apiVersion v1
+kind Pod
+metadata
+name kube-test
+labels
+    app kube-test
+spec
+containers
+- name nginx
+    image nginx
+    ports
+    - name  http
+    containerPort 80
+    protocol TCP
+EOF
+kubectl create -f kube-test.yaml
+Check the Pod’s status
+
+kubectl get po
+Set up kube-scheduler
+The next steps will allow Pods to schedule on the kube.
+
+Start the scheduler
+
+kube-scheduler --master=httplocalhost8080 & etckubernetesscheduler.log &
+Check its status and initial logs
+
+ps -au  grep scheduler
+head etckubernetesscheduler.log
+Check to see if the Pod was scheduled
+
+kubectl get po
+Delete the Pod
+
+kubectl delete po --all
+Set up kube-controller-manager
+The next steps will set up a controller-manager for state-enforcment of various things in the kube.
+
+Create a Deployment
+
+cat EOF  .replica-test.yaml
+apiVersion appsv1
+kind Deployment
+metadata
+name replica-test
+spec
+replicas 3
+selector
+    matchLabels
+    app replica-test
+template
+    metadata
+    name replica-test
+    labels
+        app replica-test
+    spec
+    containers
+    - name nginx
+        image nginx
+        ports
+        - name  http
+        containerPort 80
+        protocol TCP
+EOF
+kubectl create -f replica-test.yaml
+Check the Deployment’s status
+
+kubectl get deploy
+Check that no Pods are Pending for this Deployment
+
+kubectl get po
+Start the controller-manager
+
+kube-controller-manager --master=httplocalhost8080 & etckubernetescontroller-manager.log &
+Check its status and initial logs
+
+ps -au  grep controller
+head etckubernetescontroller-manager.log
+Check the status of the Deployment
+
+kubectl get deploy
+Resume and check the rollout of the Deployment, if the number of AVAILABLE Pods still does not change
+
+kubectl rollout resume deployreplica-test
+kubectl rollout status deployreplica-test
+Check the new Pods
+
+kubectl get po
+Set up kube-proxy
+The next steps will allow the Deployment to communicate outside of the Docker network in a K8s-compliant manner.
+
+Create a Service for the replica-test Deployment
+
+cat EOF  .service-test.yaml
+apiVersion v1
+kind Service
+metadata
+name replica-test
+spec
+type ClusterIP
+ports
+- name http
+    port 80
+selector
+    app replica-test
+    ```
+
+    ```bash
+    EOF
+    kubectl create -f service-test.yaml
+Curl the service to see if any Pod is contacted
+
+kubectl get svc
+curl {CLUSTER IP}80
+Start kube-proxy
+
+kube-proxy --master=httplocalhost8080 & etckubernetesproxy.log &
+Check its status and initial logs
+
+ps -au  grep proxy
+head etckubernetesproxy.log
+Curl the Service again to see if any Pod is contacted
+
+kubectl get svc
+curl {CLUSTER IP}80

@@ -1,0 +1,34 @@
+Instruction
+GCP 접속 환경 & GKE, GCR 생성 및 설정
+- GCP 인증
+gcloud init
+GCP 프로젝트에 등록된 IAM 계정 선택 (번호로 선택)
+터미널에 나온 Url 클릭
+제공해준 Credential 복사 후 터미널에 복사
+flipped-education-341507 프로젝트 선택 (번호로 선택)
+매핑할 리전/존 선택(list 입력하여 추가정보 확인)
+설정 확인
+gcloud auth list
+gcloud config list project
+설정 변경(필요시)
+gcloud config set project NEW-PROJECT
+gcloud config set compute/zone NEW-ZONE
+- GCP Cluster GKE(Google Kubernetes Engine) 생성
+gcloud container clusters create (user##-gke) --zone (Zone Code) --logging SYSTEM --monitoring SYSTEM --subnetwork default
+- GCP 클러스터 토큰 가져오기
+gcloud container clusters get-credentials (Cluster Name) --zone (Zone Code) --project (PROJECT-ID)
+클러스터 생성 후 아래와 같은 명령어 입력 후 결과값 확인
+kubectl get all 
+결과 화면
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.52.0.1    <none>        443/TCP   3m9s
+- Lab에 필요한 YAMLs 다운로드
+cd /home/project
+git clone https://github.com/event-storming/container-orchestration.git
+cd /container-orchestration/yaml
+- GCP GCR(Google Container Registry) 인증
+gcloud auth configure-docker
+- GCR 레지스트리에 이미지 Push
+docker push gcr.io/PROJECT-ID/user##-IMAGE-NAME:v1
+Checkpoints

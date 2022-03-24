@@ -1,0 +1,27 @@
+Instruction
+Azure 접속 환경 & ACR, AKS 생성 및 설정
+- Azure 관리콘솔에서 ‘구독(Subscription)’ 확인
+Azure 관리콘솔 접속
+‘구독’ 서비스에서 가용한 구독이름 확인
+- Azure 관리콘솔에서 ‘리소스 그룹’ 생성
+Azure 관리콘솔 접속
+‘리소스 그룹’ 서비스에서 새로운 그룹 추가
+구독 선택
+리소스 그룹명 입력
+영역(Region) 입력 - ‘한국중부’ 선택
+- Cloud IDE - Azure Client Config 설정
+az login 
+- AKS (Azure Kubernetes Service) 생성
+az aks create --resource-group (RESOURCE-GROUP-NAME) --name (Cluster-NAME) --node-count 2 --enable-addons monitoring --generate-ssh-keys
+- K8s Client 에 Target Context 설정
+az aks get-credentials --resource-group (RESOURCE-GROUP-NAME) --name (Cluster-NAME)
+- ACR (Azure Container Registry) 생성
+az acr create --resource-group (RESOURCE-GROUP-NAME) --name (REGISTRY-NAME) --sku Basic
+- Azure AKS에 ACR Attach 설정
+az aks update -n (Cluster-NAME) -g (RESOURCE-GROUP-NAME) --attach-acr (REGISTRY-NAME)
+- Azure ACR Login 설정
+az acr login --name (REGISTRY-NAME) --expose-token
+- Lab에 필요한 YAMLs 다운로드
+cd homeproject
+git clone httpsgithub.comevent-stormingcontainer-orchestration.git
+cd container-orchestrationyaml

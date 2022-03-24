@@ -1,0 +1,48 @@
+Instruction
+
+CodeBuild를 활용한 파이프라인
+
+CodeBuild에 사용될 환경변수
+AWS_ACCOUNT_ID
+KUBE_URL
+KUBE_TOKEN
+CodeBuild와 ECR 연결정책 JSON
+{
+      Action [
+        ecrBatchCheckLayerAvailability,
+        ecrCompleteLayerUpload,
+        ecrGetAuthorizationToken,
+        ecrInitiateLayerUpload,
+        ecrPutImage,
+        ecrUploadLayerPart
+      ],
+      Resource ,
+      Effect Allow
+ }
+CodeBuild 에서 EKS 연결
+Service Account 생성
+cat EOF  kubectl apply -f -
+apiVersion v1
+kind ServiceAccount
+metadata
+  name eks-admin
+  namespace kube-system
+EOF
+ClusterRoleBinding 생성
+cat EOF  kubectl apply -f -
+apiVersion rbac.authorization.k8s.iov1beta1
+kind ClusterRoleBinding
+metadata
+  name eks-admin
+roleRef
+  apiGroup rbac.authorization.k8s.io
+  kind ClusterRole
+  name cluster-admin
+subjects
+- kind ServiceAccount
+  name eks-admin
+  namespace kube-system
+EOF
+SA로 EKS 접속 토큰 가져오기
+kubectl -n kube-system describe secret eks-admin
+# token 결과값만 공백없이 복사
